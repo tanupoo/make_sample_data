@@ -6,7 +6,8 @@ def scatter_sample(dim_range,
                    ret_type="scatter",
                    cluster_sizes=None,
                    jitters=None,
-                   random_seed=None):
+                   random_seed=None,
+                   debug=False):
     """
     dim_range: a list of the range of each dimension.
         e.g. [(s0_min,s0_max), (s1_min,s1_max), ...]
@@ -21,8 +22,11 @@ def scatter_sample(dim_range,
             the form of return value is like:
                 [ [i00, i10, ..., i90], [j01, j11, ..., j91], ... ]
             the number of items is equal to the number of dimensions.
+    cluster_sizes: a list of the size of each dimension for a cluster.
+        it is only used to determine the jitters.
     jitters: a list of the jitter of each dimension.
         e.g. [0.1, 0.02, ...]
+        if jitters is specified, cluster_sizes will be ignored.
     """
     if random_seed is not None:
         random.seed(random_seed)
@@ -34,11 +38,15 @@ def scatter_sample(dim_range,
         cluster_sizes = []
         for s_min, s_max in dim_range:
             cluster_sizes.append(random.uniform(0.5,1.5)*(s_max-s_min)/nb_clusters)
+        if debug:
+            print("cluster_sizes=", cluster_sizes)
     #
     if jitters is None:
         jitters = []
         for i in range(len(dim_range)):
             jitters.append(cluster_sizes[i]*0.2)
+        if debug:
+            print("jitters=", jitters)
     #
     cluster_pos = []
     for cn in range(nb_clusters):
@@ -71,10 +79,19 @@ if __name__ == "__main__":
     import matplotlib.pyplot as plt
     #
     # the form of n is [ [i0, j0], [i1, j1], ..., [i9, j9] ]
-    n = scatter_sample([(0,10),(0,10)], 10, 4, ret_type="scatter")
+    n = scatter_sample([(0,10),(0,10)], 10, 4, ret_type="scatter",
+                       random_seed=0)
     #
     # the form of n is [ [i0, i1, ..., i9], [j0, j1, ..., j9] ]
-    n = scatter_sample([(0,10),(0,10)], 100, 4, ret_type="linear")
+    n = scatter_sample([(0,10),(0,10)], 100, 4, ret_type="linear",
+                       random_seed=1)
+    fig = plt.figure()
+    plt.plot(n[0], n[1], "o")
+    plt.show()
+    #
+    n = scatter_sample([(0,10),(0,10)], 1000, 10, ret_type="linear",
+                       jitters=(0.4,0.4),
+                       random_seed=2, debug=True)
     fig = plt.figure()
     plt.plot(n[0], n[1], "o")
     plt.show()
