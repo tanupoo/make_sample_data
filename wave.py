@@ -15,8 +15,9 @@ def wave_sample(nb_points=240,
                 "min":
                 "cycle":
                 "phase":
-                "trend":
-                "noise":
+                "trend": n / 100
+                "noise": n / 100
+                "lack": n / 100
         default is:
     return:
         a list of { "x": [...], "y": [...], "label": "name" }
@@ -32,7 +33,9 @@ def wave_sample(nb_points=240,
                     n : {
                             "max": 30., "min": -30., "cycle": 12., "phase": 0,
                             "trend": random.uniform(-1., 1),
-                            "noise": random.uniform(0,.5) } } )
+                            "noise": random.uniform(0,50),
+                            "lack": 0
+                            } } )
     #
     sample = []
     for n, p in wave_profile.items():
@@ -41,15 +44,17 @@ def wave_sample(nb_points=240,
         diff = (p["max"] + p["min"]) / 2
         amp = p["max"] - diff
         trend = 0
+        lack = p.get("lack", 0)
         for x in np.linspace(x_range[0],x_range[1],nb_points):
-            noise = random.uniform(-amp,amp)*p["noise"]
-            ret_x.append(x)
-            ret_y.append(
-                amp*np.sin(np.pi*(x+p["phase"])*2/p["cycle"])+
-                diff+
-                noise+
-                trend
-            )
+            if random.uniform(0,100) > lack:
+                noise = random.uniform(-1,1)*amp*p["noise"]/100
+                ret_x.append(x)
+                ret_y.append(
+                    amp*np.sin(np.pi*(x+p["phase"])*2/p["cycle"])+
+                    diff+
+                    noise+
+                    trend
+                )
             trend += amp*p["trend"]/100
         sample.append({"x":ret_x, "y":ret_y, "label":n})
     #
@@ -88,35 +93,44 @@ if __name__ == "__main__":
                   "trend": 0, "noise": 0 },
             "E": { "max": 20., "min": 0.,
                   "cycle": 12., "phase": 0,
-                  "trend": 0, "noise": 0.2 },
+                  "trend": 0, "noise": 20 },
+            })
+    #
+    test({
+            "A": { "max": 50., "min": 30.,
+                  "cycle": 12., "phase": 0,
+                  "trend": 0, "noise": 0 },
+            "B": { "max": 50., "min": 30.,
+                  "cycle": 12., "phase": 3,
+                  "trend": 0, "noise": 0, "lack": 30 },
             })
     #
     test({
         "A": { "max": 50., "min": 30.,
                 "cycle": 12., "phase": 0,
-                "trend": 0, "noise": 0.2 },
+                "trend": 0, "noise": 20 },
         "B": { "max": 45., "min": 35.,
                 "cycle": 12., "phase": 0,
-                "trend": 0, "noise": 0.1 },
+                "trend": 0, "noise": 10 },
         "C": { "max": 40., "min": 30.,
                 "cycle": 12., "phase": 0,
-                "trend": 0, "noise": 0.1 },
+                "trend": 0, "noise": 10 },
         "D": { "max": 30., "min": 10.,
                 "cycle": 12., "phase": 0,
-                "trend": 0.5, "noise": 0.1 },
+                "trend": 0.5, "noise": 10 },
         "E": { "max": 30., "min": 15.,
                 "cycle": 12., "phase": 0,
-                "trend": 0, "noise": 0.1 },
+                "trend": 0, "noise": 10 },
         "F": { "max": 25., "min": 10.,
                 "cycle": 12., "phase": 0,
-                "trend": 0, "noise": 0.1 },
+                "trend": 0, "noise": 10 },
         "G": { "max": 15., "min": -20.,
                 "cycle": 12., "phase": 0,
-                "trend": -0.5, "noise": 0.1 },
+                "trend": -0.5, "noise": 10 },
         "H": { "max": 10., "min": -10.,
                 "cycle": 12., "phase": 0,
-                "trend": 0, "noise": 0.1 },
+                "trend": 0, "noise": 20 },
         "I": { "max":  0., "min": -30.,
                 "cycle": 12., "phase": 0,
-                "trend": 0, "noise": 0.1 },
+                "trend": 0, "noise": 10 },
         })
