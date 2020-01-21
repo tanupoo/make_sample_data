@@ -58,7 +58,7 @@ def make_cydata(input_data,
                 "classes": "tcp"    # tcp, udp, icmp, ip, other, ipv4, ipv6
             }
             ]
-        """
+    """
     cy_nodes = []
     cy_edges = []
     total_score = 0
@@ -80,7 +80,7 @@ def make_cydata(input_data,
             raise ValueError("ERROR: no input_data found.")
         if isinstance(input_data[0], dict):
             for d in input_data:
-                make_node(d["src"], d["dst"], d.get("proto"))
+                make_node(d["src"], d["dst"], d.get("proto","").lower())
                 total_score += 1
         else:
             # list or tuple
@@ -112,7 +112,7 @@ def make_cydata(input_data,
                 except:
                     # just ignore to remove a port number.
                     pass
-            make_node(src, dst, r.group("proto"))
+            make_node(src, dst, r.group("proto").lower())
             total_score += 1
     else:
         raise ValueError("ERROR: invalid input_source, {}".format(input_source))
@@ -162,9 +162,9 @@ def make_cydata(input_data,
         "initialTemp": 200,
         "coolingFactor": 0.95,
         "minTemp": 1.0
-      },
+      }
 
-    return { "data":cy_nodes + cy_edges, "layout":layout }
+    return { "elements":cy_nodes + cy_edges, "layout":layout }
 
 if __name__ == "__main__":
     import json
@@ -174,13 +174,14 @@ if __name__ == "__main__":
         python make_cyelement.py [tuple|dict|test]
     or
         sudo tcpdump -w hoge.dmp -nqti en0
-        tcpdump -r hoge.dmp -n | python make_cyelement.py
+        tcpdump -qr hoge.dmp -n | python make_cyelement.py
     """
     if len(sys.argv) == 1:
         """
         e.g.
         """
-        cy_data = make_cydata(sys.stdin, input_source="tcpdump")
+        cy_data = make_cydata(sys.stdin,
+                              input_source="tcpdump", layout="circle")
         print(json.dumps(cy_data))
         exit(0)
     # simple test
@@ -203,13 +204,14 @@ if __name__ == "__main__":
             { "src":"A", "dst":"B", "proto":"tcp", "sport":4321, "dstport":80 },
             { "src":"A", "dst":"B", "proto":"tcp", "sport":4322, "dstport":80 },
             { "src":"C", "dst":"B", "proto":"udp", "sport":5522, "dstport":53 }
-            ]
+            ],
+            layout="grid"
             )
     elif sys.argv[1] == "test":
         sys.path.insert(0, "../")
         from make_sample_data.network import network_sample
         input_data = network_sample(random_seed=0)
-        cy_data = make_cydata(input_data)
+        cy_data = make_cydata(input_data, layout="cose")
     else:
         print("this [tuple|dict|test]")
         exit(1)
