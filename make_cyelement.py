@@ -126,9 +126,9 @@ def make_cydata(input_data,
                         "source": "{}".format(v["src"]),
                         "target": "{}".format(v["dst"]),
                         "score": round(v["score"]/total_score,5),
+                        "proto": v["proto"],
+                        "classes": "ipv4"
                         },
-                "classes": "ipv4",
-                "proto": v["proto"]
                 })
 
     # make nodes.
